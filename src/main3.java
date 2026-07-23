@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class EnrollmentApp {
+public class main3 {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -33,7 +33,7 @@ public class EnrollmentApp {
                     System.out.print("Student Name: ");
                     String name = sc.nextLine();
 
-                    students.add(new Student());
+                    students.add(new Student(id, name));
                     enrollments.put(id, new ArrayList<>());
                     System.out.println("Student Registered");
                     break;
