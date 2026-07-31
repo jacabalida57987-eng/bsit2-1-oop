@@ -53,8 +53,6 @@ public class MiniATM {
         System.out.print("Enter your choice: ");
     }
 
-    // ---------------------- DEPOSIT ----------------------
-
     static void deposit() {
 
         System.out.print("Enter amount to deposit: ");
@@ -87,8 +85,6 @@ public class MiniATM {
 
         }
     }
-
-    // ---------------------- WITHDRAW ----------------------
 
     static void withdraw() {
 
@@ -133,7 +129,6 @@ public class MiniATM {
         }
     }
 
-    // ---------------------- CHECK BALANCE ----------------------
 
     static void checkBalance() {
 
@@ -142,9 +137,6 @@ public class MiniATM {
     }
 }
 
-// =====================================================
-// CUSTOM EXCEPTION
-// =====================================================
 
 class InsufficientFundsException extends Exception {
 
