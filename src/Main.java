@@ -1,168 +1,74 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
-public class MiniATM {
-
-    static double balance = 1000.00;
-    static Scanner input = new Scanner(System.in);
-
+public class Main {
     public static void main(String[] args) {
 
-        System.out.println("=========================================");
-        System.out.println("      WELCOME TO THE MINI ATM");
-        System.out.println("=========================================");
+        ArrayList<Vehicle> vehicles = new ArrayList<>();
+        Scanner input = new Scanner(System.in);
+        int choice = 0;
 
-        boolean running = true;
+        while (choice != 5) {
+            System.out.println();
+            System.out.println("===== VEHICLE MANAGER =====");
+            System.out.println("1 - Add Car");
+            System.out.println("2 - Add Motorcycle");
+            System.out.println("3 - Remove a Vehicle");
+            System.out.println("4 - Display All Vehicles");
+            System.out.println("5 - Exit");
+            System.out.print("Choose an option: ");
+            choice = input.nextInt();
+            input.nextLine();
 
-        while (running) {
+            if (choice == 1) {
+                System.out.print("Brand: ");
+                String brand = input.nextLine();
+                System.out.print("Year: ");
+                int year = input.nextInt();
+                System.out.print("Number of doors: ");
+                int doors = input.nextInt();
 
-            printMenu();
-            String choice = input.nextLine();
 
-            switch (choice) {
-                case "1":
-                    deposit();
-                    break;
+                vehicles.add(new Car(brand, year, doors));
+                System.out.println(">> Car added!");
+            }
+            else if (choice == 2) {
+                System.out.print("Brand: ");
+                String brand = input.nextLine();
+                System.out.print("Year: ");
+                int year = input.nextInt();
+                System.out.print("Has sidecar? (true/false): ");
+                boolean sidecar = input.nextBoolean();
 
-                case "2":
-                    withdraw();
-                    break;
+                vehicles.add(new Motorcycle(brand, year, sidecar));
+                System.out.println(">> Motorcycle added!");
+            }
+            else if (choice == 3) {
+                System.out.print("Enter the number to remove: ");
+                int number = input.nextInt();
 
-                case "3":
-                    checkBalance();
-                    break;
+                if (number >= 1 && number <= vehicles.size()) {
+                    vehicles.remove(number - 1);
+                    System.out.println(">> Removed!");
+                } else {
+                    System.out.println(">> Invalid number.");
+                }
+            }
+            else if (choice == 4) {
+                System.out.println("--- All Vehicles ---");
+                if (vehicles.isEmpty()) {
+                    System.out.println("(none yet)");
+                }
 
-                case "4":
-                    running = false;
-                    System.out.println("\nThank you for using the Mini ATM. Goodbye!");
-                    break;
 
-                default:
-                    System.out.println("\n[!] Please choose a number from 1 to 4.\n");
+                for (int i = 0; i < vehicles.size(); i++) {
+                    System.out.print((i + 1) + ". ");
+                    vehicles.get(i).displayInfo();
+                }
             }
         }
 
+        System.out.println("Goodbye!");
         input.close();
-    }
-
-    static void printMenu() {
-        System.out.println("\nCurrent Options:");
-        System.out.println("[1] Deposit");
-        System.out.println("[2] Withdraw");
-        System.out.println("[3] Check Balance");
-        System.out.println("[4] Exit");
-        System.out.print("Enter your choice: ");
-    }
-
-    // ---------------------- DEPOSIT ----------------------
-
-    static void deposit() {
-
-        System.out.print("Enter amount to deposit: ");
-        String line = input.nextLine();
-
-        try {
-
-            double amount = Double.parseDouble(line);
-
-            if (amount <= 0) {
-                throw new InvalidAmountException("Amount must be greater than zero.");
-            }
-
-            balance += amount;
-
-            System.out.printf("Deposited PHP %.2f%n", amount);
-            System.out.printf("New Balance: PHP %.2f%n", balance);
-
-        } catch (NumberFormatException e) {
-
-            System.out.println("[!] Please enter a valid number.");
-
-        } catch (InvalidAmountException e) {
-
-            System.out.println("[!] " + e.getMessage());
-
-        } finally {
-
-            System.out.println("-- transaction finished --\n");
-
-        }
-    }
-
-    // ---------------------- WITHDRAW ----------------------
-
-    static void withdraw() {
-
-        System.out.print("Enter amount to withdraw: ");
-        String line = input.nextLine();
-
-        try {
-
-            double amount = Double.parseDouble(line);
-
-            if (amount <= 0) {
-                throw new InvalidAmountException("Amount must be greater than zero.");
-            }
-
-            if (amount > balance) {
-
-                double shortfall = amount - balance;
-
-                throw new InsufficientFundsException(
-                        "Insufficient funds. You are short by PHP "
-                                + String.format("%.2f", shortfall),
-                        shortfall);
-            }
-
-            balance -= amount;
-
-            System.out.printf("Withdrew PHP %.2f%n", amount);
-            System.out.printf("New Balance: PHP %.2f%n", balance);
-
-        } catch (NumberFormatException e) {
-
-            System.out.println("[!] Please enter a valid number.");
-
-        } catch (InvalidAmountException | InsufficientFundsException e) {
-
-            System.out.println("[!] " + e.getMessage());
-
-        } finally {
-
-            System.out.println("-- transaction finished --\n");
-
-        }
-    }
-
-    // ---------------------- CHECK BALANCE ----------------------
-
-    static void checkBalance() {
-
-        System.out.printf("%nCurrent Balance: PHP %.2f%n%n", balance);
-
-    }
-}
-
-// =====================================================
-// CUSTOM EXCEPTION
-// =====================================================
-
-class InsufficientFundsException extends Exception {
-
-    private double shortfall;
-
-    public InsufficientFundsException(String message, double shortfall) {
-        super(message);
-        this.shortfall = shortfall;
-    }
-
-    public double getShortfall() {
-        return shortfall;
-    }
-}
-
-class InvalidAmountException extends Exception {
-
-    public InvalidAmountException(String message) {
-        super(message);
     }
 }
