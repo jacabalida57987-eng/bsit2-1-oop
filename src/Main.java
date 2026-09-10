@@ -1,168 +1,139 @@
 import java.util.Scanner;
 
-public class MiniATM {
-
-    static double balance = 1000.00;
-    static Scanner input = new Scanner(System.in);
+public class Main {
+    private static Scanner input = new Scanner(System.in);
+    private static UserManager manager = new UserManager();
+    private static int nextId = 1;
 
     public static void main(String[] args) {
-
-        System.out.println("=========================================");
-        System.out.println("      WELCOME TO THE MINI ATM");
-        System.out.println("=========================================");
+        seedSampleUsers();
 
         boolean running = true;
 
         while (running) {
+            showMenu();
 
-            printMenu();
-            String choice = input.nextLine();
+            String choice = input.nextLine().trim();
 
-            switch (choice) {
-                case "1":
-                    deposit();
-                    break;
-
-                case "2":
-                    withdraw();
-                    break;
-
-                case "3":
-                    checkBalance();
-                    break;
-
-                case "4":
-                    running = false;
-                    System.out.println("\nThank you for using the Mini ATM. Goodbye!");
-                    break;
-
-                default:
-                    System.out.println("\n[!] Please choose a number from 1 to 4.\n");
-            }
-        }
-
-        input.close();
-    }
-
-    static void printMenu() {
-        System.out.println("\nCurrent Options:");
-        System.out.println("[1] Deposit");
-        System.out.println("[2] Withdraw");
-        System.out.println("[3] Check Balance");
-        System.out.println("[4] Exit");
-        System.out.print("Enter your choice: ");
-    }
-
-    // ---------------------- DEPOSIT ----------------------
-
-    static void deposit() {
-
-        System.out.print("Enter amount to deposit: ");
-        String line = input.nextLine();
-
-        try {
-
-            double amount = Double.parseDouble(line);
-
-            if (amount <= 0) {
-                throw new InvalidAmountException("Amount must be greater than zero.");
+            if (choice.equals("1")) {
+                addUser();
+            } else if (choice.equals("2")) {
+                manager.listAll();
+            } else if (choice.equals("3")) {
+                searchUser();
+            } else if (choice.equals("4")) {
+                deleteUser();
+            } else if (choice.equals("5")) {
+                manager.exportAll();
+            } else if (choice.equals("6")) {
+                System.out.println("Goodbye!");
+                running = false;
+            } else {
+                System.out.println("Invalid choice. Please enter 1 to 6.");
             }
 
-            balance += amount;
-
-            System.out.printf("Deposited PHP %.2f%n", amount);
-            System.out.printf("New Balance: PHP %.2f%n", balance);
-
-        } catch (NumberFormatException e) {
-
-            System.out.println("[!] Please enter a valid number.");
-
-        } catch (InvalidAmountException e) {
-
-            System.out.println("[!] " + e.getMessage());
-
-        } finally {
-
-            System.out.println("-- transaction finished --\n");
-
+            System.out.println();
         }
     }
 
-    // ---------------------- WITHDRAW ----------------------
+    private static void showMenu() {
+        System.out.println("===== USER MANAGEMENT SYSTEM =====");
+        System.out.println("1. Add user");
+        System.out.println("2. List all users");
+        System.out.println("3. Search user by ID");
+        System.out.println("4. Delete user by ID");
+        System.out.println("5. Export all users");
+        System.out.println("6. Exit");
+        System.out.print("Choose an option: ");
+    }
 
-    static void withdraw() {
+    private static void addUser() {
+        System.out.println("Type of user: 1 = Admin 2 = Teacher 3 = Student");
+        System.out.print("Choose type: ");
 
-        System.out.print("Enter amount to withdraw: ");
-        String line = input.nextLine();
+        String type = input.nextLine().trim();
 
-        try {
+        System.out.print("Name: ");
+        String name = input.nextLine().trim();
 
-            double amount = Double.parseDouble(line);
+        System.out.print("Email: ");
+        String email = input.nextLine().trim();
 
-            if (amount <= 0) {
-                throw new InvalidAmountException("Amount must be greater than zero.");
-            }
+        User user; // the variable is the ABSTRACT type
 
-            if (amount > balance) {
+        if (type.equals("1")) {
+            user = new Admin(nextId, name, email);
 
-                double shortfall = amount - balance;
+        } else if (type.equals("2")) {
+            System.out.print("Department: ");
+            String dept = input.nextLine().trim();
 
-                throw new InsufficientFundsException(
-                        "Insufficient funds. You are short by PHP "
-                                + String.format("%.2f", shortfall),
-                        shortfall);
-            }
+            user = new Teacher(nextId, name, email, dept);
 
-            balance -= amount;
+        } else if (type.equals("3")) {
+            System.out.print("Course: ");
+            String course = input.nextLine().trim();
 
-            System.out.printf("Withdrew PHP %.2f%n", amount);
-            System.out.printf("New Balance: PHP %.2f%n", balance);
+            user = new Student(nextId, name, email, course);
 
-        } catch (NumberFormatException e) {
+        } else {
+            System.out.println("Unknown type. User was not added.");
+            return;
+        }
 
-            System.out.println("[!] Please enter a valid number.");
+        manager.add(user);
+        nextId++;
+    }
 
-        } catch (InvalidAmountException | InsufficientFundsException e) {
+    private static void searchUser() {
+        System.out.print("Enter ID to search: ");
 
-            System.out.println("[!] " + e.getMessage());
+        int id = readInt();
 
-        } finally {
+        User found = manager.findById(id);
 
-            System.out.println("-- transaction finished --\n");
-
+        if (found == null) {
+            System.out.println("No user found with ID " + id + ".");
+        } else {
+            System.out.println("Found:");
+            found.display();
         }
     }
 
-    // ---------------------- CHECK BALANCE ----------------------
+    private static void deleteUser() {
+        System.out.print("Enter ID to delete: ");
 
-    static void checkBalance() {
+        int id = readInt();
 
-        System.out.printf("%nCurrent Balance: PHP %.2f%n%n", balance);
-
-    }
-}
-
-// =====================================================
-// CUSTOM EXCEPTION
-// =====================================================
-
-class InsufficientFundsException extends Exception {
-
-    private double shortfall;
-
-    public InsufficientFundsException(String message, double shortfall) {
-        super(message);
-        this.shortfall = shortfall;
+        if (manager.deleteById(id)) {
+            System.out.println("User " + id + " was deleted.");
+        } else {
+            System.out.println("No user found with ID " + id + ".");
+        }
     }
 
-    public double getShortfall() {
-        return shortfall;
+    private static int readInt() {
+        while (true) {
+            String line = input.nextLine().trim();
+
+            try {
+                return Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                System.out.print("That is not a number. Try again: ");
+            }
+        }
     }
-}
 
-class InvalidAmountException extends Exception {
+    private static void seedSampleUsers() {
+        manager.add(new Admin(nextId, "Razz", "razz@liceo.edu.ph"));
+        nextId++;
 
-    public InvalidAmountException(String message) {
-        super(message);
+        manager.add(new Teacher(nextId, "Maria", "maria@liceo.edu.ph", "CIT"));
+        nextId++;
+
+        manager.add(new Student(nextId, "Ana", "ana@liceo.edu.ph", "BSIT"));
+        nextId++;
+
+        System.out.println();
     }
 }
